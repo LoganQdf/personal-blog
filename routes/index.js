@@ -40,7 +40,7 @@ function checkLogin(req,res,next){
 module.exports = function(app){
     //首页的路由
     app.get('/',function(req,res){
-        Post.get(null,function(err,posts){
+        Post.getAll(null,function(err,posts){
             if(err){
                 posts = [];
             }
@@ -185,5 +185,47 @@ module.exports = function(app){
     app.post('/upload',checkLogin,upload.array('field1',5),function(req,res){
         req.flash('success','文件上传成功');
         res.redirect('/upload');
+    })
+    //用户发布的所有文章
+    app.get('/u/:name',function(req,res){
+        //1.先获取到要查询的用户名姓名
+        var name  = req.params.name;
+        //2.查询用户名是否存在
+        User.get(name,function(err,user){
+            if(err){
+                req.flash('error','该用户名不存在');
+                return res.redirect('/');
+            }
+            //3.查询该用户下的所有文章
+            Post.getAll(user.name,function(err,posts){
+                if(err){
+                    req.flash('error',err);
+                    return res.redirect('/');
+                }
+                res.render('user',{
+                    title:user.name,
+                    user:req.session.user,
+                    success:req.flash('success').toString(),
+                    error:req.flash('error').toString(),
+                    posts:posts
+                })
+            })
+        })
+    })
+    //文章的详情页面
+    app.get('/u/:name/:minute/:title',function(req,res){
+        Post.getOne(req.params.name,req.params.minute,req.params.title,function(err,post){
+            if(err){
+                req.flash('error',err);
+                return res.redirect('/');
+            }
+            res.render('article',{
+                title:post.title,
+                user:req.session.user,
+                success:req.flash('success').toString(),
+                error:req.flash('error').toString(),
+                post:post
+            })
+        })
     })
 }
