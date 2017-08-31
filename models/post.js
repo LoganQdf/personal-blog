@@ -58,7 +58,7 @@ Post.prototype.save = function(callback){
     })
 }
 //读取文章列表
-Post.getAll = function(name,callback){
+Post.getTen = function(name,page,callback){
     mongo.open(function(err,db){
         if(err){
             return callback(err);
@@ -72,17 +72,23 @@ Post.getAll = function(name,callback){
             if(name){
                 query = {name:name}
             }
-            collection.find(query).sort({time:-1})
-                .toArray(function(err,docs){
-                    mongo.close();
-                    if(err){
-                        return callback(err);
-                    }
-                    //加入markdown解析
-                    docs.forEach(function(doc){
-                        doc.post = markdown.toHTML(doc.post);
+            collection.count(query,function(err,total){
+                collection.find(query,{
+                    skip:(page-1)*10,
+                    limit:10
+                }).sort({time:-1})
+                    .toArray(function(err,docs){
+                        mongo.close();
+                        if(err){
+                            return callback(err);
+                        }
+                        //加入markdown解析
+                        docs.forEach(function(doc){
+                            doc.post = markdown.toHTML(doc.post);
+                        })
+                        callback(null,docs,total);
                     })
-                    callback(null,docs);
+
             })
         })
     })
