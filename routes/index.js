@@ -43,7 +43,7 @@ module.exports = function(app){
     //首页的路由
     app.get('/',function(req,res){
         //如果有参数传递(page当前页数),就使用参数作为当前页数，如果没有，就是第一页
-        var page = req.query.page || 1;
+        var page = parseInt(req.query.page) || 1;
         Post.getTen(null,page,function(err,posts,total){
             if(err){
                 posts = [];
@@ -203,7 +203,7 @@ module.exports = function(app){
         //1.先获取到要查询的用户名姓名
         var name  = req.params.name;
         //获取当前传递的页数
-        var page = req.query.page || 1;
+        var page = parseInt(req.query.page) || 1;
         //2.查询用户名是否存在
         User.get(name,function(err,user){
             if(err){
@@ -306,6 +306,22 @@ module.exports = function(app){
             }
             req.flash('success','留言成功');
             res.redirect('back');
+        })
+    })
+    //存档的页面
+    app.get('/archive',function(req,res){
+        Post.getArchive(function(err,posts){
+            if(err){
+                req.flash('error',err);
+                return res.redirect('/');
+            }
+            res.render('archive',{
+                title:'存档页面',
+                user:req.session.user,
+                success:req.flash('success').toString(),
+                error:req.flash('error').toString(),
+                posts:posts
+            })
         })
     })
 }
