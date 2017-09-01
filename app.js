@@ -60,7 +60,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 //启动应用
-app.listen(3000,function(){
+app.listen(5000,function(){
   console.log('node is OK');
 })
 module.exports = app;

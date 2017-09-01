@@ -37,7 +37,9 @@ Post.prototype.save = function(callback){
         tags:this.tags,
         post:this.post,
         //增加一个留言的字段
-        comments:[]
+        comments:[],
+        //增加一个留言的计数
+        pv:0
     }
     //打开数据库
     mongo.open(function(err,db){
@@ -113,9 +115,24 @@ Post.getOne = function(name,minute,title,callback){
                 "time.minute":minute,
                 "title":title
             },function(err,doc){
-                mongo.close();
                 if(err){
+                    mongo.close();
                     return callback(err);
+                }
+                //当用户查询文章的时候，让它的PV字段+1
+                if(doc){
+                    collection.update({
+                        "name":name,
+                        "time.minute":minute,
+                        "title":title
+                    },{
+                        $inc:{"pv":1}
+                    },function(err){
+                        mongo.close();
+                        if(err){
+                            return callback(err);
+                        }
+                    })
                 }
                 //将这个文章内容进行markdown格式的解析
                 doc.post = markdown.toHTML(doc.post);
