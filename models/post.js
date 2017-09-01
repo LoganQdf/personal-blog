@@ -302,3 +302,33 @@ Post.getTag = function(tag,callback){
         });
     });
 }
+//搜索
+Post.search = function(keyword,callback){
+    mongo.open(function(err,db){
+        if(err){
+            return callback(err);
+        }
+        db.collection('posts',function(err,colleciton){
+            if(err){
+                mongo.close();
+                return callback(err);
+            }
+            var reg = new RegExp(keyword,'i');
+            colleciton.find({
+                "title":reg
+            },{
+                "name":1,
+                "time":1,
+                "title":1
+            }).sort({
+                time:-1
+            }).toArray(function(err,docs){
+                mongo.close();
+                if(err){
+                    return callback(err);
+                }
+                callback(null,docs);
+            })
+        })
+    })
+}
