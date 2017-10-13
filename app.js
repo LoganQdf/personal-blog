@@ -31,11 +31,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(flash());
 //将session保存在MongoDB里面
 app.use(session({
-    secret:"lzyBlog",
+    secret:"qdfBlog",
     key:setting.db,
     cookie:{maxAge:30 * 24 * 60 * 60 * 1000},
     store:new Mongostore({
-        url:'mongodb://localhost/lzyblog'
+        url:'mongodb://localhost/qdfblog'
     }),
     resave:false,
     saveUninitialized:true
